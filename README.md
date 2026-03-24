@@ -31,7 +31,8 @@ ping-pong-game/
 │   ├── entities.py       ← classes Ball e Paddle (domínio puro)
 │   ├── physics.py        ← classe PhysicsEngine (colisões)
 │   ├── ai.py             ← classe AIController (lógica da IA)
-│   └── input_handler.py  ← classe InputHandler (entrada do teclado)
+│   ├── input_handler.py  ← classe InputHandler (entrada do teclado)
+│   └── protocols.py      ← contratos abstratos (Protocols/interfaces)
 └── ui/
     ├── renderer.py       ← classe Renderer (desenho de entidades)
     ├── hud.py            ← classe HUD (placar)
@@ -40,11 +41,13 @@ ping-pong-game/
 
 ### Princípios SOLID aplicados
 
-| Princípio | Aplicação                                                               |
-| --------- | ----------------------------------------------------------------------- |
-| SRP       | Cada classe tem uma única responsabilidade                              |
-| OCP       | `AIController` aceita novos níveis de dificuldade sem alterar o núcleo  |
-| DIP       | `Game` depende de abstrações injetadas, não de implementações concretas |
+| Princípio | Nome completo                   | Aplicação no projeto                                                                                                                        |
+| --------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| SRP       | Single Responsibility Principle | Cada classe tem exatamente uma responsabilidade: `PhysicsEngine` só trata colisões, `HUD` só desenha o placar, etc.                         |
+| OCP       | Open/Closed Principle           | `AIController` é estendido por novas dificuldades adicionando entradas no dicionário `_AJUSTE_VELOCIDADE`, sem tocar nos métodos existentes |
+| LSP       | Liskov Substitution Principle   | Qualquer classe que implemente um Protocol (ex.: `IRenderizador`) pode substituir outra sem quebrar o comportamento de `Game`               |
+| ISP       | Interface Segregation Principle | Cada Protocol expõe apenas os métodos que o consumidor precisa: `IHUD` só tem `draw_score`, `IMotorFisico` só tem os métodos de colisão     |
+| DIP       | Dependency Inversion Principle  | `Game` depende dos contratos em `protocols.py` — nunca das classes concretas `Renderer`, `AIController`, `PhysicsEngine`, etc.              |
 
 ## Como Instalar
 
