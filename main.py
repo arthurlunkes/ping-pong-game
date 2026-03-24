@@ -1,161 +1,120 @@
-import pygame
+"""Ponto de entrada do jogo Ping-Pong.
+
+Este módulo inicializa o pygame, monta as dependências de cada camada
+e inicia o loop principal do jogo.
+"""
+
 import sys
 
-pygame.init()
+import pygame
 
-PRETO=(0,0,0)
-BRANCO=(255,255,255)
-
-largura=800
-altura=600
-
-tela=pygame.display.set_mode((largura,altura))
-pygame.display.set_caption("Pong")
-
-
-def menu_principal():
-    while not False:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_SPACE:
-                    return True
-               
-        tela.fill(PRETO)
-        font = pygame.font.SysFont(None, 50)
-        text = font.render("Pong", True, BRANCO)
-        text_rect = text.get_rect(center=(largura//2, altura//4+50))
-        tela.blit(text, text_rect)
-
-        font_blynk = pygame.font.SysFont(None, 26)
-        tempo = pygame.time.get_ticks()
-        if tempo %2000<1000:
-            text_blynk = font_blynk.render("Pressione ESPAÇO para jogar",
-                                           True,
-                                           BRANCO)
-            text_blynk_rect = text_blynk.get_rect(center=(largura//2,
-                                                           altura//2+60))
-            tela.blit(text_blynk, text_blynk_rect)
-
-        pygame.display.flip()
+import config
+from game.ai import AIController
+from game.core import Game
+from game.entities import Ball, Paddle
+from game.input_handler import InputHandler
+from game.physics import PhysicsEngine
+from ui.hud import HUD
+from ui.menu import MenuScreen
+from ui.renderer import Renderer
 
 
-def game():
-    clock=pygame.time.Clock()
-    raquete_largura=10
-    raquete_altura=60
-    tamanho_bola=7
+def _criar_jogo(screen: pygame.Surface) -> Game:
+    """Instancia e conecta todas as dependências de uma partida."""
+    player1 = Paddle(
+        x=config.PADDLE_MARGIN,
+        y=config.SCREEN_HEIGHT // 2 - config.PADDLE_HEIGHT // 2,
+        width=config.PADDLE_WIDTH,
+        height=config.PADDLE_HEIGHT,
+        speed=config.PADDLE_SPEED,
+    )
+    player2 = Paddle(
+        x=config.SCREEN_WIDTH - config.PADDLE_MARGIN - config.PADDLE_WIDTH,
+        y=config.SCREEN_HEIGHT // 2 - config.PADDLE_HEIGHT // 2,
+        width=config.PADDLE_WIDTH,
+        height=config.PADDLE_HEIGHT,
+        speed=config.PADDLE_SPEED,
+    )
+    ball = Ball(
+        x=config.SCREEN_WIDTH // 2 - config.BALL_RADIUS // 2,
+        y=config.SCREEN_HEIGHT // 2 - config.BALL_RADIUS // 2,
+        radius=config.BALL_RADIUS,
+        velocity_x=config.BALL_SPEED_X,
+        velocity_y=config.BALL_SPEED_Y,
+    )
+    renderer = Renderer(
+        screen=screen,
+        draw_api=pygame.draw,
+        display_api=pygame.display,
+        background_color=config.BLACK,
+        foreground_color=config.WHITE,
+    )
+    hud = HUD(
+        screen=screen,
+        font_factory=pygame.font.SysFont,
+        text_color=config.WHITE,
+        center_x=config.SCREEN_WIDTH // 2,
+    )
+    return Game(
+        player1=player1,
+        player2=player2,
+        ball=ball,
+        renderer=renderer,
+        hud=hud,
+        ai=AIController(difficulty="medium"),
+        input_handler=InputHandler(
+            up_key=pygame.K_UP,
+            down_key=pygame.K_DOWN,
+            quit_event_type=pygame.QUIT,
+        ),
+        physics=PhysicsEngine(),
+        clock=pygame.time.Clock(),
+        event_api=pygame.event,
+        key_api=pygame.key,
+        fps=config.FPS,
+        screen_width=config.SCREEN_WIDTH,
+        screen_height=config.SCREEN_HEIGHT,
+        win_score_player1=config.WIN_SCORE_PLAYER_1,
+        win_score_player2=config.WIN_SCORE_PLAYER_2,
+    )
 
-    player1_x =15
-    player1_y = altura//2- raquete_altura//2
 
-    player_2 = largura -15- raquete_largura
-    player_2_y = altura//2- raquete_altura//2
+def _criar_menu(screen: pygame.Surface) -> MenuScreen:
+    """Instancia o menu principal com as dependências do pygame."""
+    return MenuScreen(
+        screen=screen,
+        event_api=pygame.event,
+        display_api=pygame.display,
+        time_api=pygame.time,
+        font_factory=pygame.font.SysFont,
+        title=config.WINDOW_TITLE,
+        background_color=config.BLACK,
+        foreground_color=config.WHITE,
+        screen_width=config.SCREEN_WIDTH,
+        screen_height=config.SCREEN_HEIGHT,
+        quit_event_type=pygame.QUIT,
+        keydown_event_type=pygame.KEYDOWN,
+        start_key=pygame.K_SPACE,
+    )
 
-    bola_x = largura//2- tamanho_bola//2
-    bola_y = altura//2- tamanho_bola//2
 
+def main() -> None:
+    """Inicializa o pygame e executa o ciclo menu → partida."""
+    pygame.init()
+    screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+    pygame.display.set_caption(config.WINDOW_TITLE)
 
-    velocidade_bola_x =5
-    velocidade_bola_y =5
-
-    score_player1 =0
-    score_player2 =0
+    menu = _criar_menu(screen)
 
     while True:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                return True
-
-        tela.fill(PRETO)
-   
-        bola_x += velocidade_bola_x
-        bola_y += velocidade_bola_y
-
-        bola_rect = pygame.Rect(bola_x, bola_y, tamanho_bola, tamanho_bola)
-        player1_rect = pygame.Rect(player1_x,
-                                    player1_y,
-                                    raquete_largura,
-                                    raquete_altura)
-   
-        player_2_rect = pygame.Rect(player_2,
-                                    player_2_y,
-                                    raquete_largura,
-                                    raquete_altura)
-   
-        if bola_rect.colliderect(player1_rect) or bola_rect.colliderect(player_2_rect):
-            velocidade_bola_x =-velocidade_bola_x
-
-        if bola_y <=0or bola_y >= altura - tamanho_bola:
-            velocidade_bola_y =-velocidade_bola_y
-
-        if bola_x <=0:
-            score_player2 +=1
-            bola_x = largura//2- tamanho_bola//2
-            bola_y = altura//2- tamanho_bola//2
-            velocidade_bola_x =-velocidade_bola_x
-            print(f"Player 2: {score_player2}")
-            if score_player2 >=2:
-                print("Player 2 venceu!")
-                return True
-   
-        if bola_x >= largura - tamanho_bola:
-            score_player1 +=1
-            bola_x = largura//2- tamanho_bola//2
-            bola_y = altura//2- tamanho_bola//2
-            velocidade_bola_x =-velocidade_bola_x
-            print(f"Player 1: {score_player1}")
-            if score_player1 >=10:
-                print("Player 1 venceu!")
-                return True
-
-        if player_2_y + raquete_altura//2< bola_y:
-            player_2_y +=5
-        elif player_2_y + raquete_altura//2> bola_y:
-            player_2_y -=5
-
-        if player_2_y <0:
-            player_2_y =0
-        elif player_2_y > altura - raquete_altura:
-            player_2_y = altura - raquete_altura
-
-        pygame.draw.rect(tela, BRANCO, (player1_x,
-                                        player1_y,
-                                        raquete_largura,
-                                        raquete_altura))
-        pygame.draw.rect(tela, BRANCO, (player_2,
-                                        player_2_y,
-                                        raquete_largura,
-                                        raquete_altura))
-        pygame.draw.circle(tela, BRANCO, (bola_x, bola_y), tamanho_bola)
-
-        font_score = pygame.font.SysFont(None, 36)
-        score_text = font_score.render(f"{score_player1} - {score_player2}",
-                                    True,
-                                    BRANCO)
-        tela.blit(score_text, score_text.get_rect(center=(largura//2, 30)))
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP] and player1_y >0:
-            player1_y -=5
-        if keys[pygame.K_DOWN] and player1_y < altura - raquete_altura:
-            player1_y +=5
-
-        pygame.display.flip()
-        clock.tick(60)
-
-def main():
-    while True:
-        if not menu_principal():
+        if not menu.run():
             break
-
-        if not game():
+        if not _criar_jogo(screen).run():
             break
 
     pygame.quit()
     sys.exit()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()

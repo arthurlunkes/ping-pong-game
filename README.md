@@ -1,64 +1,84 @@
-# Simple 2D Pong (Pygame)
+# Ping-Pong 2D (Pygame)
 
-A simple 2D Pong game built with Python and Pygame.
+Jogo Pong 2D desenvolvido com Python e Pygame, aplicando princípios SOLID
+e separação de responsabilidades.
 
-## Project Description
+## Descrição
 
-This project is a classic Pong clone with:
-- One human player (left paddle)
-- One computer-controlled opponent (right paddle)
-- Ball collision and scoring system
-- Win condition and restart option
+Clone clássico do Pong com:
 
-## Controls
+- Jogador humano (raquete esquerda) e oponente controlado por IA (raquete direita)
+- Motor de física isolado para colisões
+- IA extensível por nível de dificuldade
+- Arquitetura orientada a objetos com módulos desacoplados
 
-- Up Arrow: Move paddle up
-- Down Arrow: Move paddle down
-- R: Restart after match end
+## Controles
 
-## How to Download
+| Tecla           | Ação                     |
+| --------------- | ------------------------ |
+| Seta para cima  | Mover raquete para cima  |
+| Seta para baixo | Mover raquete para baixo |
+| Espaço          | Iniciar partida no menu  |
 
-You can get this project in one of these ways:
+## Arquitetura
 
-1. Clone with Git:
-
-```bash
-git clone https://github.com/arthurlunkes/ping-pong-game
-cd ping_pong_python
+```
+ping-pong-game/
+├── main.py               ← ponto de entrada, monta e inicia o jogo
+├── config.py             ← todas as constantes configuráveis
+├── game/
+│   ├── core.py           ← classe Game (orquestrador do loop)
+│   ├── entities.py       ← classes Ball e Paddle (domínio puro)
+│   ├── physics.py        ← classe PhysicsEngine (colisões)
+│   ├── ai.py             ← classe AIController (lógica da IA)
+│   ├── input_handler.py  ← classe InputHandler (entrada do teclado)
+│   └── protocols.py      ← contratos abstratos (Protocols/interfaces)
+└── ui/
+    ├── renderer.py       ← classe Renderer (desenho de entidades)
+    ├── hud.py            ← classe HUD (placar)
+    └── menu.py           ← classe MenuScreen (tela inicial)
 ```
 
-2. Or download ZIP from your repository page and extract it.
+### Princípios SOLID aplicados
 
-## Install Dependencies
+| Princípio | Nome completo                   | Aplicação no projeto                                                                                                                        |
+| --------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| SRP       | Single Responsibility Principle | Cada classe tem exatamente uma responsabilidade: `PhysicsEngine` só trata colisões, `HUD` só desenha o placar, etc.                         |
+| OCP       | Open/Closed Principle           | `AIController` é estendido por novas dificuldades adicionando entradas no dicionário `_AJUSTE_VELOCIDADE`, sem tocar nos métodos existentes |
+| LSP       | Liskov Substitution Principle   | Qualquer classe que implemente um Protocol (ex.: `IRenderizador`) pode substituir outra sem quebrar o comportamento de `Game`               |
+| ISP       | Interface Segregation Principle | Cada Protocol expõe apenas os métodos que o consumidor precisa: `IHUD` só tem `draw_score`, `IMotorFisico` só tem os métodos de colisão     |
+| DIP       | Dependency Inversion Principle  | `Game` depende dos contratos em `protocols.py` — nunca das classes concretas `Renderer`, `AIController`, `PhysicsEngine`, etc.              |
 
-1. (Optional) Create and activate a virtual environment.
+## Como Instalar
+
+1. (Opcional) Crie e ative um ambiente virtual:
 
 Windows (PowerShell):
+
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-Linux (bash)
+Linux/macOS:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-2. Install dependencies:
+2. Instale as dependências:
 
 ```bash
 pip install -r pip_freeze.txt
 ```
 
-## Run the Project
-
-From the project folder, run:
+## Como Executar
 
 ```bash
 python main.py
 ```
 
-## Main Dependency
+## Dependência Principal
 
 - pygame 2.6.1
