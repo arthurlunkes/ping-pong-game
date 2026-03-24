@@ -22,13 +22,18 @@ class AIController:
         """
         self.difficulty = difficulty
 
+    # Mapeamento de ajustes de velocidade por dificuldade (OCP):
+    # novas dificuldades são adicionadas aqui sem alterar compute_move().
+    _AJUSTE_VELOCIDADE: dict[str, int] = {
+        "easy": -2,
+        "medium": 0,
+        "hard": +2,
+    }
+
     def _step_by_difficulty(self, default_speed: int) -> int:
         """Retorna passo de movimento conforme dificuldade configurada."""
-        if self.difficulty == "easy":
-            return max(1, default_speed - 2)
-        if self.difficulty == "hard":
-            return default_speed + 2
-        return default_speed
+        ajuste = self._AJUSTE_VELOCIDADE.get(self.difficulty, 0)
+        return max(1, default_speed + ajuste)
 
     def compute_move(self, paddle: Paddle, ball: Ball) -> int:
         """Calcula deslocamento vertical da IA para o frame atual.
