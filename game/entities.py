@@ -87,3 +87,10 @@ class Ball:
             self.velocity_x = velocity_x
         if velocity_y is not None:
             self.velocity_y = velocity_y
+
+
+@dataclass
+class DecoyBall(Ball):
+    """Bola distrativa usada no power-up de fragmentação."""
+
+    color: tuple[int, int, int]
