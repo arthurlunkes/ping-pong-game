@@ -72,7 +72,18 @@ class Ball:
         """Inverte a direção vertical do movimento."""
         self.velocity_y = -self.velocity_y
 
-    def reset(self, center_x: int, center_y: int) -> None:
-        """Reposiciona a bola no centro preservando a direção atual."""
+    def reset(self, center_x: int, center_y: int, velocity_x: int | None = None, velocity_y: int | None = None) -> None:
+        """Reposiciona a bola no centro e opcionalmente restaura velocidades.
+        
+        Parâmetros:
+            center_x: coordenada X do centro
+            center_y: coordenada Y do centro
+            velocity_x: se fornecido, restaura o velocity_x
+            velocity_y: se fornecido, restaura o velocity_y
+        """
         self.x = center_x - self.radius // 2
         self.y = center_y - self.radius // 2
+        if velocity_x is not None:
+            self.velocity_x = velocity_x
+        if velocity_y is not None:
+            self.velocity_y = velocity_y
