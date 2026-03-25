@@ -35,13 +35,14 @@ class Renderer:
         """Desenha uma raquete na tela."""
         self.draw_api.rect(self.screen, self.foreground_color, paddle.rect)
 
-    def draw_ball(self, ball: Ball) -> None:
+    def draw_ball(self, ball: Ball, color: tuple[int, int, int] | None = None) -> None:
         """Desenha a bola na tela.
 
         O comportamento original é preservado: o centro do círculo usa as
         coordenadas x/y da própria entidade.
         """
-        self.draw_api.circle(self.screen, self.foreground_color, (ball.x, ball.y), ball.radius)
+        draw_color = color if color is not None else self.foreground_color
+        self.draw_api.circle(self.screen, draw_color, (ball.x, ball.y), ball.radius)
 
     def flip(self) -> None:
         """Apresenta o frame atual na janela."""

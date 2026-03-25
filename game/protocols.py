@@ -53,7 +53,7 @@ class IRenderizador(Protocol):
         """Desenha uma raquete na tela."""
         ...
 
-    def draw_ball(self, ball: object) -> None:
+    def draw_ball(self, ball: object, color: tuple[int, int, int] | None = None) -> None:
         """Desenha a bola na tela."""
         ...
 

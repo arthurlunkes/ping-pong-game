@@ -25,6 +25,10 @@ BALL_RADIUS = 7
 BALL_SPEED_X = 5
 BALL_SPEED_Y = 5
 
+# Power-up de fragmentação
+BALL_FRAGMENT_INTERVAL_MS = 5000
+BALL_FRAGMENT_TOTAL = 4
+
 # Pontuação de vitória equilibrada para dar chance ao jogador
 WIN_SCORE_PLAYER_1 = 5
 WIN_SCORE_PLAYER_2 = 5
