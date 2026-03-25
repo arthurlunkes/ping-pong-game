@@ -25,6 +25,6 @@ BALL_RADIUS = 7
 BALL_SPEED_X = 5
 BALL_SPEED_Y = 5
 
-# Pontuação de vitória mantida intencionalmente para preservar o BUG original
-WIN_SCORE_PLAYER_1 = 10
-WIN_SCORE_PLAYER_2 = 2
+# Pontuação de vitória equilibrada para dar chance ao jogador
+WIN_SCORE_PLAYER_1 = 5
+WIN_SCORE_PLAYER_2 = 5

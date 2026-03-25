@@ -7,7 +7,7 @@ as camadas: física, IA, entrada, renderização e regras de pontuação.
 from __future__ import annotations
 from typing import Any
 from game.entities import Ball, Paddle
-from game.protocols import IControladorIA, IEntradaJogador, IHUD, IMotorFisico, IRenderizador
+from game.protocols import IAudioManager, IControladorIA, IEntradaJogador, IHUD, IMotorFisico, IRenderizador
 
 
 class Game:
@@ -31,6 +31,7 @@ class Game:
         screen_height: int,
         win_score_player1: int,
         win_score_player2: int,
+        audio: IAudioManager | None = None,
     ) -> None:
         """Inicializa o jogo com todas as dependências injetadas via abstrações (DIP)."""
         self.player1 = player1
@@ -49,6 +50,7 @@ class Game:
         self.screen_height = screen_height
         self.win_score_player1 = win_score_player1
         self.win_score_player2 = win_score_player2
+        self.audio = audio
 
         self.score_player1 = 0
         self.score_player2 = 0
@@ -60,20 +62,26 @@ class Game:
             True quando a partida termina por pontuação (permite voltar ao menu).
             False quando o usuário fecha a janela.
         """
-        while True:
-            events = list(self.event_api.get())
+        if self.audio:
+            self.audio.iniciar_musica()
+        try:
+            while True:
+                events = list(self.event_api.get())
 
-            if self.input_handler.get_quit_event(events):
-                return False
+                if self.input_handler.get_quit_event(events):
+                    return False
 
-            self._update()
+                self._update()
 
-            resultado = self._verificar_pontuacao()
-            if resultado is not None:
-                return resultado
+                resultado = self._verificar_pontuacao()
+                if resultado is not None:
+                    return resultado
 
-            self._renderizar()
-            self.clock.tick(self.fps)
+                self._renderizar()
+                self.clock.tick(self.fps)
+        finally:
+            if self.audio:
+                self.audio.parar_musica()
 
     def _update(self) -> None:
         """Atualiza posições e estado do jogo para o frame atual."""
@@ -90,8 +98,12 @@ class Game:
 
         # Física da bola: movimento, colisão com raquetes e paredes
         self.ball.update()
-        self.physics.handle_paddle_collision(self.ball, self.player1, self.player2)
-        self.physics.handle_wall_collision(self.ball, self.screen_height)
+        if self.physics.handle_paddle_collision(self.ball, self.player1, self.player2):
+            if self.audio:
+                self.audio.tocar_colisao_raquete()
+        if self.physics.handle_wall_collision(self.ball, self.screen_height):
+            if self.audio:
+                self.audio.tocar_colisao_parede()
 
     def _verificar_pontuacao(self) -> bool | None:
         """Verifica se algum jogador marcou ponto e atualiza o placar.
@@ -103,15 +115,23 @@ class Game:
         # Bola saiu pela esquerda: ponto para o jogador 2
         if self.ball.x <= 0:
             self.score_player2 += 1
+            if self.audio:
+                self.audio.tocar_gol()
             self._resetar_bola()
             if self.score_player2 >= self.win_score_player2:
+                if self.audio:
+                    self.audio.tocar_derrota_jogador()
                 return True
 
         # Bola saiu pela direita: ponto para o jogador 1
         elif self.ball.x >= self.screen_width - self.ball.radius:
             self.score_player1 += 1
+            if self.audio:
+                self.audio.tocar_gol()
             self._resetar_bola()
             if self.score_player1 >= self.win_score_player1:
+                if self.audio:
+                    self.audio.tocar_vitoria_jogador()
                 return True
 
         return None
