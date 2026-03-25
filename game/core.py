@@ -54,6 +54,10 @@ class Game:
 
         self.score_player1 = 0
         self.score_player2 = 0
+        
+        # Guarda velocidades iniciais para restaurar após cada gol
+        self.initial_velocity_x = ball.velocity_x
+        self.initial_velocity_y = ball.velocity_y
 
     def run(self) -> bool:
         """Executa o loop principal da partida.
@@ -137,11 +141,18 @@ class Game:
         return None
 
     def _resetar_bola(self) -> None:
-        """Reposiciona a bola no centro e inverte a direção horizontal.
-
-        A inversão de direção após ponto preserva o comportamento do código original.
+        """Reposiciona a bola no centro e restaura velocidades iniciais.
+        
+        Inverte a direção horizontal, mantendo a degradação da velocidade
+        causada por variações aleatórias nas colisões. As velocidades iniciais
+        são restauradas cada vez que a bola é resetada após um gol.
         """
-        self.ball.reset(self.screen_width // 2, self.screen_height // 2)
+        self.ball.reset(
+            self.screen_width // 2, 
+            self.screen_height // 2,
+            velocity_x=self.initial_velocity_x,
+            velocity_y=self.initial_velocity_y
+        )
         self.ball.invert_x()
 
     def _renderizar(self) -> None:
