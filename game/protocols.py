@@ -68,3 +68,27 @@ class IHUD(Protocol):
     def draw_score(self, player_1_score: int, player_2_score: int) -> None:
         """Desenha o placar na tela."""
         ...
+
+
+class IAudioManager(Protocol):
+    """Contrato para gerenciamento de áudio do jogo."""
+
+    def tocar_colisao_raquete(self) -> None:
+        """Toca som de colisão da bola com a raquete."""
+        ...
+
+    def tocar_colisao_parede(self) -> None:
+        """Toca som de colisão da bola com a parede."""
+        ...
+
+    def tocar_gol(self) -> None:
+        """Toca alerta sonoro de marcação de ponto."""
+        ...
+
+    def iniciar_musica(self) -> None:
+        """Inicia a trilha sonora de fundo em loop."""
+        ...
+
+    def parar_musica(self) -> None:
+        """Para a trilha sonora de fundo."""
+        ...
