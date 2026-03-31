@@ -49,16 +49,23 @@ class PhysicsEngine:
     def handle_paddle_collision(self, ball: Ball, paddle_left: Paddle, paddle_right: Paddle) -> bool:
         """Inverte eixo X da bola quando houver colisão com qualquer raquete.
 
+        Após a colisão, reposiciona a bola para fora da raquete para evitar travamento.
         Aplica variação aleatória ao ângulo de saída para imprevisibilidade.
         Retorna True quando a colisão foi detectada e tratada.
         """
-        collided = self.check_paddle_collision(ball, paddle_left) or self.check_paddle_collision(
-            ball, paddle_right
-        )
-        if collided:
+        if self.check_paddle_collision(ball, paddle_left):
             ball.invert_x()
             self._apply_angle_variation(ball, variation_range=0.6)
-        return collided
+            # Reposiciona a bola para fora da raquete esquerda
+            ball.x = paddle_left.x + paddle_left.width + 1
+            return True
+        elif self.check_paddle_collision(ball, paddle_right):
+            ball.invert_x()
+            self._apply_angle_variation(ball, variation_range=0.6)
+            # Reposiciona a bola para fora da raquete direita
+            ball.x = paddle_right.x - ball.radius - 1
+            return True
+        return False
 
     def handle_wall_collision(self, ball: Ball, screen_height: int) -> bool:
         """Inverte eixo Y da bola quando houver colisão nas bordas superior/inferior.
