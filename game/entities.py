@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 @dataclass
+
 class Paddle:
     """Representa uma raquete controlada por jogador ou IA."""
 
@@ -15,16 +16,24 @@ class Paddle:
     y: int
     width: int
     height: int
-    speed: int
+    speed: int  # Velocidade base máxima
+    velocity_y: int = 0  # Velocidade vertical atual
 
     @property
     def rect(self) -> tuple[int, int, int, int]:
         """Retorna o retângulo atual da raquete como (x, y, largura, altura)."""
         return (self.x, self.y, self.width, self.height)
 
-    def move(self, delta_y: int) -> None:
-        """Move a raquete verticalmente em delta_y pixels."""
-        self.y += delta_y
+    def move(self, delta_y: int = None) -> None:
+        """Move a raquete verticalmente usando velocity_y ou delta_y se fornecido."""
+        if delta_y is not None:
+            self.velocity_y = delta_y
+        self.y += self.velocity_y
+
+    def set_dynamic_speed(self, ball_velocity: int) -> None:
+        """Ajusta a velocidade máxima da raquete baseada na velocidade da bola, limitado a 70%."""
+        max_speed = max(2, int(abs(ball_velocity) * 0.7))
+        self.speed = max_speed
 
     def clamp_to_screen(self, screen_height: int) -> None:
         """Mantém a raquete totalmente dentro dos limites da tela."""

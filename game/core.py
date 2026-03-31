@@ -99,6 +99,11 @@ class Game:
 
     def _update(self) -> None:
         """Atualiza posições e estado do jogo para o frame atual."""
+
+        # Ajusta a velocidade máxima da raquete conforme a velocidade da bola
+        self.player1.set_dynamic_speed(self.ball.velocity_y)
+        self.player2.set_dynamic_speed(self.ball.velocity_y)
+
         # Movimento do jogador controlado pelo teclado
         pressed_keys = self.key_api.get_pressed()
         dy_player = self.input_handler.get_player_dy(self.player1.speed, pressed_keys)
